@@ -1,8 +1,25 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
+  creationTimestamp: '2025-08-06T11:06:42Z'
+  generation: 5
+  managedFields:
+    - apiVersion: tekton.dev/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          .: {}
+          'f:finally': {}
+          'f:params': {}
+          'f:tasks': {}
+          'f:workspaces': {}
+      manager: Mozilla
+      operation: Update
+      time: '2025-08-06T11:48:06Z'
   name: sample-pipeline
   namespace: sample-service
+  resourceVersion: '698314'
+  uid: 8d0a4bb3-885b-497b-a26f-73c61597e1a4
 spec:
   tasks:
     - name: maven-1-19-0
@@ -110,5 +127,16 @@ spec:
       workspaces:
         - name: output
           workspace: my-workspace
+    - name: openshift-client
+      params:
+        - name: SCRIPT
+          value: oc rollout status deploy/sample-service
+        - name: VERSION
+          value: latest
+      runAfter:
+        - buildah-1-19-0
+      taskRef:
+        kind: Task
+        name: openshift-client
   workspaces:
     - name: my-workspace
