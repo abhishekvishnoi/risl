@@ -2,23 +2,23 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   creationTimestamp: '2025-08-06T11:06:42Z'
-  generation: 5
+  generation: 6
   managedFields:
     - apiVersion: tekton.dev/v1
       fieldsType: FieldsV1
       fieldsV1:
-        'f:spec':
+        f:spec:
           .: {}
-          'f:finally': {}
-          'f:params': {}
-          'f:tasks': {}
-          'f:workspaces': {}
+          f:finally: {}
+          f:params: {}
+          f:tasks: {}
+          f:workspaces: {}
       manager: Mozilla
       operation: Update
-      time: '2025-08-06T11:48:06Z'
+      time: '2025-08-06T12:01:15Z'
   name: sample-pipeline
   namespace: sample-service
-  resourceVersion: '698314'
+  resourceVersion: '710191'
   uid: 8d0a4bb3-885b-497b-a26f-73c61597e1a4
 spec:
   tasks:
@@ -48,7 +48,8 @@ spec:
     - name: buildah-1-19-0
       params:
         - name: IMAGE
-          value: 'image-registry.openshift-image-registry.svc:5000/sample-service/sample-service:latest'
+          value: >-
+            image-registry.openshift-image-registry.svc:5000/sample-service/sample-service:latest
         - name: DOCKERFILE
           value: ./Dockerfile
         - name: BUILD_ARGS
@@ -104,7 +105,7 @@ spec:
         - name: SSL_VERIFY
           value: 'false'
         - name: URL
-          value: 'https://github.com/abhishekvishnoi/sample-user-service.git'
+          value: https://github.com/abhishekvishnoi/sample-user-service.git
         - name: REVISION
           value: main
         - name: REFSPEC
@@ -127,7 +128,7 @@ spec:
       workspaces:
         - name: output
           workspace: my-workspace
-    - name: openshift-client
+    - name: openshift-client-1-19-0
       params:
         - name: SCRIPT
           value: oc rollout status deploy/sample-service
@@ -136,7 +137,16 @@ spec:
       runAfter:
         - buildah-1-19-0
       taskRef:
-        kind: Task
-        name: openshift-client
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client-1-19-0
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
   workspaces:
     - name: my-workspace
+      optional: false
+  params: []
+  finally: []
