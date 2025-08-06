@@ -1,0 +1,114 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: sample-pipeline
+  namespace: sample-service
+spec:
+  tasks:
+    - name: maven-1-19-0
+      params:
+        - name: GOALS
+          value:
+            - package
+        - name: MAVEN_MIRROR_URL
+          value: ''
+        - name: SUBDIRECTORY
+          value: .
+      runAfter:
+        - git-clone-1-19-0
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: maven-1-19-0
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: source
+          workspace: my-workspace
+    - name: buildah-1-19-0
+      params:
+        - name: IMAGE
+          value: 'image-registry.openshift-image-registry.svc:5000/sample-service/sample-service:latest'
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: BUILD_ARGS
+          value: []
+        - name: CONTEXT
+          value: .
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: FORMAT
+          value: oci
+        - name: BUILD_EXTRA_ARGS
+          value: ''
+        - name: PUSH_EXTRA_ARGS
+          value: ''
+        - name: SKIP_PUSH
+          value: 'false'
+        - name: TLS_VERIFY
+          value: 'false'
+        - name: VERBOSE
+          value: 'false'
+      runAfter:
+        - maven-1-19-0
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: buildah-1-19-0
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: source
+          workspace: my-workspace
+    - name: git-clone-1-19-0
+      params:
+        - name: CRT_FILENAME
+          value: ca-bundle.crt
+        - name: HTTP_PROXY
+          value: ''
+        - name: HTTPS_PROXY
+          value: ''
+        - name: NO_PROXY
+          value: ''
+        - name: SUBDIRECTORY
+          value: ''
+        - name: USER_HOME
+          value: /home/git
+        - name: DELETE_EXISTING
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+        - name: SSL_VERIFY
+          value: 'false'
+        - name: URL
+          value: 'https://github.com/abhishekvishnoi/sample-user-service.git'
+        - name: REVISION
+          value: main
+        - name: REFSPEC
+          value: ''
+        - name: SUBMODULES
+          value: 'true'
+        - name: DEPTH
+          value: '1'
+        - name: SPARSE_CHECKOUT_DIRECTORIES
+          value: ''
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone-1-19-0
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
+      workspaces:
+        - name: output
+          workspace: my-workspace
+  workspaces:
+    - name: my-workspace
